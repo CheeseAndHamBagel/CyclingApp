@@ -40,8 +40,6 @@ public class Rider {
         name = nameIN;
     }
 
-
-    
     public int getYear(){
         return yearOfBirth;
     }
@@ -56,5 +54,9 @@ public class Rider {
 
     public int getTeamID(){
         return teamID;
+    }
+
+    public void changeTeam(int newTeamID){
+        teamID = newTeamID;
     }
 }
