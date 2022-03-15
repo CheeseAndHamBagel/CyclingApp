@@ -18,7 +18,8 @@ public class Rider {
      * @param birthYr
      * @param team
      */
-    public Rider(String nameIN, int birthYr, int team){
+    public Rider(int rID, String nameIN, int birthYr, int team){
+        riderID = rID;
         name = nameIN;
         yearOfBirth = birthYr;
         teamID = team;

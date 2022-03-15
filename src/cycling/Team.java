@@ -1,16 +1,12 @@
 package cycling;
-public class Team {
-    /*
-    name
-    description
-    id
-    list of team members or member ids
-    */
 
+import java.util.ArrayList;
+
+public class Team {
     private String name;
     private String description;
     private int teamID;
-    private int[] riders; //Official rules usually have 10-20 riders so will be instatiated to have 20 elements, even if most are empty
+    private ArrayList<Integer> riders;
 
     public Team(int tID, String n, String desc){
         name = n;
@@ -31,6 +27,23 @@ public class Team {
     }
 
     public int[] getRiders(){
-        return riders;
+        int[] riderIDs = new int[riders.size()];
+        for (int a = 0; a < riders.size(); a++){
+            riderIDs[a] = riders.get(a);
+        }
+        return riderIDs;
+    }
+
+    public int addRider(int riderID){
+        riders.add(riderID);
+        return riderID;
+    }
+
+    public void removeRider(int riderID){
+        for (int a = 0; a < riders.size(); a++){
+            if (riders.get(a) == riderID){
+                riders.remove(a);
+            }
+        }
     }
 }

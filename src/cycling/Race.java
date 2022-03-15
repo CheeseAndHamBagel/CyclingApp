@@ -10,7 +10,7 @@ public class Race {
     private String description; 
                         
 
-    public Race(String n, String d, int index){
+    public Race(int index, String n, String d){
         name = n;
         description = d;
         raceID = index;
