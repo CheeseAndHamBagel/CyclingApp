@@ -51,6 +51,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return false;
 	}
 	
+	/**
+	* This method checks to see if the name of the race exists
+	*
+	* @param name : Team's name 
+	* @param arraySet race : List of teams within the system 
+	* @return boolean value depending on if the name is already in the system
+	*/
 	public boolean nameTeamExists(String name, List<Team> arraySet){
 		for (Team a : arraySet){
 			if (name == a.getName()){
@@ -64,7 +71,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	* Checks to see if the name given for a race is invalid, not longer then 30 characters and is not blank
 	*
 	* @param name : Race's name
-	* @return boolean value depending on if the name is invalid
+	* @return boolean value depending on if the name is invalid, true if invalid and false if valid
 	*/
 	public boolean nameInValid(String name){
 		if (name.length() > 30 || name.contains(" ") || name.equals(null) || name.equals("")){
@@ -76,11 +83,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 	/**
 	* This method creates the race within the system with the name and description given
 	*
-	*@param name : Race's name
-	*@param description : Race's description
-	*@throws IllegalNameException : If the name given is already within the system
-	*@throws InvalidNameException : If the name given is blank or is more then 30 characters long
-	*@return 
+	* @param name : Race's name
+	* @param description : Race's description
+	* @throws IllegalNameException : If the name given is already within the system
+	* @throws InvalidNameException : If the name given is blank or is more then 30 characters long
+	* @return A unique Id for the race created
 	*/
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
@@ -95,7 +102,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 		racesInternal.add(newRace);
 		return racesInternal.get(index).getRaceID();
 	}
-
+	
+	/**
+	* Getting the details about a race from its ID
+	*
+	* @param raceId : The ID of the race wishing to find details on
+	* @throws IDNotRecognisedException : If the ID is not within the system
+	* @return A formatted string in the form raceID,name,description,stageLength
+	*/
 	@Override
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -106,6 +120,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* This method removes the race and all the details about it 
+	*
+	* @param raceId : The Id is the race wanted to be removed
+	* @throws IDNotRecgonisedException : If the Id is not within the system
+	*/
 	@Override
 	public void removeRaceById(int raceId) throws IDNotRecognisedException {
 		for (int index = 0; index < racesInternal.size(); index++){
@@ -116,6 +136,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* The method gets the number of stages within a race
+	*
+	* @param raceId : The ID of the race that is being queried
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @return The number of stages that have been created for the race
+	*/
 	@Override
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -126,6 +153,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* This creates a new stage within a race
+	*
+	* @param raceId : The Id of the race that stage wants to be added to
+	* @param stageName : The name for the stage
+	* @param description : A description for the stage 
+	* @param length : The length of the stage in kilometers
+	* @param startTime : The data and time at which the stage will be raced
+	* @throws 
+	*/
 	@Override
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
