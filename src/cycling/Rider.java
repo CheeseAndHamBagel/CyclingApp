@@ -1,3 +1,4 @@
+package cycling;
 public class Rider {
     /**
      * The rider class
