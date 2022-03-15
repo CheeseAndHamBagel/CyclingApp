@@ -43,13 +43,13 @@ public class Stage {
     public int addCatClimbSegment(int segmentId, Double location, SegmentType type, Double averageGradient, Double length){
         Segment temp = new Segment(segmentId, location, type, averageGradient, length);
         segments.add(temp);
-        return temp.getSegmenID();
+        return temp.getSegmentID();
     }
 
     public int addSprintSegment(int segmentId, Double location){
         Segment temp = new Segment(segmentId, location);
         segments.add(temp);
-        return temp.getSegmenID();
+        return temp.getSegmentID();
     }
 
     public StageType getStageType(){
@@ -59,4 +59,25 @@ public class Stage {
     public boolean isWaiting(){
         return waitingForResults;
     }
+
+    public ArrayList<Segment> getSegments(){
+        return segments;
+    }
+
+    public void removeSeg(int index){
+        segments.remove(index);
+    }
+
+    public void setWaiting(){
+        waitingForResults = true;
+    }
+
+    public int[] getSegmentIDs(){
+        int[] stageIDs = new int[segments.size()];
+        for (int a = 0; a < segments.size(); ++a){
+            stageIDs[a] = segments.get(a).getSegmentID();
+        }
+        return stageIDs;
+    }
 }
+

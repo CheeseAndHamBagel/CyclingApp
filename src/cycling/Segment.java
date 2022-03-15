@@ -28,7 +28,7 @@ public class Segment {
         return String.format("[id=%d, type=%s, average gradient=%s, start location=%d, length=%d]", segmentID, segmentType, averageGradient, location, length);
     }
     
-    public int getSegmenID(){
+    public int getSegmentID(){
         return segmentID;
     }
 }

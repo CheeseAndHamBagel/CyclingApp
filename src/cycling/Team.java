@@ -12,6 +12,12 @@ public class Team {
     private int teamID;
     private int[] riders; //Official rules usually have 10-20 riders so will be instatiated to have 20 elements, even if most are empty
 
+    public Team(int tID, String n, String desc){
+        name = n;
+        description = desc;
+        teamID = tID;
+    }
+
     public String getName(){
         return name;
     }
