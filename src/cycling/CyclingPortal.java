@@ -50,12 +50,21 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		return false;
 	}
-
+	
+	public boolean nameTeamExists(String name, List<Team> arraySet){
+		for (Team a : arraySet){
+			if (name == a.getName()){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
-	* Checks to see if the name given for a race is valid, not longer then 30 characters and is not blank
+	* Checks to see if the name given for a race is invalid, not longer then 30 characters and is not blank
 	*
 	* @param name : Race's name
-	* @return boolean value depending on if the name is valid
+	* @return boolean value depending on if the name is invalid
 	*/
 	public boolean nameInValid(String name){
 		if (name.length() > 30 || name.contains(" ") || name.equals(null) || name.equals("")){
@@ -212,32 +221,68 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
-		// TODO Auto-generated method stub
-
+		for (Race a : racesInternal){
+			for (Stage b : a.getStages()){
+				for (int c = 0; c < b.getSegments().size(); c++){
+					if (b.getSegments().get(c).getSegmentID() == segmentId){
+						if(b.isWaiting()){
+							throw new InvalidStageStateException();
+						}
+						b.removeSeg(c);
+					}
+				}
+			}
+		}
+		throw new IDNotRecognisedException();
 	}
 
 	@Override
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
-		// TODO Auto-generated method stub
-
+		for (Race a : racesInternal){
+			for (Stage b : a.getStages()){
+				if (b.getStageId() == stageId){
+					if(b.isWaiting()){
+						throw new InvalidStageStateException();
+					}
+					b.setWaiting();
+				}
+			}
+		}
+		throw new IDNotRecognisedException();
 	}
+
 
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		for (Race a : racesInternal){
+			for (Stage b : a.getStages()){
+				return b.getSegmentIDs();
+			}
+		}
+		throw new IDNotRecognisedException();
 	}
 
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (nameTeamExists(name, teamsInternal)){
+			throw new IllegalNameException();
+		}
+		else if (nameInValid(name)){
+			throw new InvalidNameException();
+		}
+		int teamID = teamsInternal.size();
+		Team team = new Team(teamID, name, description);
+		teamsInternal.add(team);
+		return teamsInternal.get(teamID).getTeamID();
 	}
 
 	@Override
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-
+		for(int a = 0; a < teamsInternal.size(); a++){
+			if (teamsInternal.get(a).getTeamID() == teamId){
+				teamsInternal.remove(a);
+			}	
+		}
 	}
 
 	@Override
