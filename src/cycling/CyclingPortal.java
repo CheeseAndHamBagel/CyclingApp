@@ -20,7 +20,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 	private ArrayList<Race> racesInternal = new ArrayList<Race>();
 	private int currentStageID = 0;
 	private int currentSegmentID = 0;
-
+	
+	/**
+	* This method gets the races that are currently in the system
+	* 
+	* @return An array of raceIds in the system or a empty array if none are in the system
+	*/
 	@Override
 	public int[] getRaceIds() {
 		int[] races = {};
@@ -30,7 +35,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return races;
 	}
 
-
+	/**
+	* This method checks to see if the name of the race exists
+	*
+	* @param name : Race's name 
+	* @param arraySet race : List of races within the system 
+	* @return boolean value depending on if the name is already in the system
+	*/
 	public boolean nameRaceExists(String name, List<Race> arraySet){
 		for (Race a : arraySet){
 			if (name == a.getName()){
@@ -40,6 +51,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return false;
 	}
 
+	/**
+	* Checks to see if the name given for a race is valid, not longer then 30 characters and is not blank
+	*
+	* @param name : Race's name
+	* @return boolean value depending on if the name is valid
+	*/
 	public boolean nameInValid(String name){
 		if (name.length() > 30 || name.contains(" ") || name.equals(null) || name.equals("")){
 			return true;
@@ -47,6 +64,15 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return false;
 	}
 
+	/**
+	* This method creates the race within the system with the name and description given
+	*
+	*@param name : Race's name
+	*@param description : Race's description
+	*@throws IllegalNameException : If the name given is already within the system
+	*@throws InvalidNameException : If the name given is blank or is more then 30 characters long
+	*@return 
+	*/
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
 		if (nameRaceExists(name, racesInternal)){
