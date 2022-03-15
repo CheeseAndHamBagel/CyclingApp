@@ -97,10 +97,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (nameInValid(name)){
 			throw new InvalidNameException();
 		}
-		int index = racesInternal.size();
-		Race newRace = new Race(name, description, index);
+		Race newRace = new Race(currentRaceID++, name, description);
 		racesInternal.add(newRace);
-		return racesInternal.get(index).getRaceID();
+		return racesInternal.get(racesInternal.size()-1).getRaceID();
 	}
 	
 	/**
@@ -307,10 +306,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		else if (nameInValid(name)){
 			throw new InvalidNameException();
 		}
-		int teamID = teamsInternal.size();
-		Team team = new Team(teamID, name, description);
+		Team team = new Team(currentTeamID++, name, description);
 		teamsInternal.add(team);
-		return teamsInternal.get(teamID).getTeamID();
+		return teamsInternal.get(teamsInternal.size()-1).getTeamID();
 	}
 
 	@Override
@@ -324,26 +322,62 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public int[] getTeams() {
-		// TODO Auto-generated method stub
-		return null;
+		int teamsSize = teamsInternal.size();
+		int[] teamIDs = new int[teamsSize];
+		for (int a = 0; a < teamsSize; a++){
+			teamIDs[a] = teamsInternal.get(a).getTeamID();
+		}
+		return teamIDs;
 	}
 
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		for(Team a : teamsInternal){
+			if(a.getTeamID() == teamId){
+				return a.getRiders();
+			}
+		}
+		throw new IDNotRecognisedException();
 	}
 
 	@Override
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return 0;
+		for(Team a : teamsInternal){
+			if(a.getTeamID() == teamID){
+				if (name == null || yearOfBirth <= 1900){
+					throw new IllegalArgumentException();
+				}
+				Rider temp = new Rider(currentRiderID++, name, yearOfBirth, teamID);
+				ridersInternal.add(temp);
+				return a.addRider(temp.getRiderID());
+			}
+		}
+		throw new IDNotRecognisedException();
+
 	}
 
 	@Override
 	public void removeRider(int riderId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
+		for (int a = 0; a < ridersInternal.size(); a++){
+        	if(ridersInternal.get(a).getRiderID() == riderId){
+				
+				//remove from system
+				Rider riderToRemove = ridersInternal.get(a);
+				ridersInternal.remove(a);
+
+				//remove from team
+				for(Team b : teamsInternal){
+					if(b.getTeamID() == riderToRemove.getTeamID()){
+						b.removeRider(riderToRemove.getRiderID());						
+					}
+				}
+
+				//remove results
+				
+			}
+        }
+		throw new IDNotRecognisedException();
 
 	}
 
