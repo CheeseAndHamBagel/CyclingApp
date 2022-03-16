@@ -160,7 +160,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 	* @param description : A description for the stage 
 	* @param length : The length of the stage in kilometers
 	* @param startTime : The data and time at which the stage will be raced
-	* @throws 
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws IllegalNameException : If the name given is blank or is more then 30 characters long
+	* @throws InvalidLengthException : If the length is less than 5km
+	* @return A unique Id for the stage created
 	*/
 	@Override
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
@@ -174,6 +177,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* Gets a list of the id of the stages that are in a race
+	*
+	* @param raceId : The Id of the race that is wanted
+	* @throws IdNotRecognisedException : If the Id is not within the system
+	* @return The list of stage IDs within the wanted race, ordered from first to last.
+	*/
 	@Override
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
