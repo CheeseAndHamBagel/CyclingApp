@@ -194,6 +194,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* This method gets the length of a stage in km
+	*
+	* @param stageId : The ID of the stage needed
+	* @throws IdNotRecognisedException : If the Id is not within the system
+	* @return The length of the stage
+	*/
 	@Override
 	public double getStageLength(int stageId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -206,6 +213,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* The method removes a stage and all the details relating to it 
+	*
+	* @param stageId : The ID of the stage wanted
+	* @throws IdNotRecognisedException : If the Id is not within the system
+	*/
 	@Override
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
