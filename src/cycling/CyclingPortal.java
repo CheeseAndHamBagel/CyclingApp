@@ -14,13 +14,17 @@ import java.util.List;
  * @version 1.13.6
  *
  */
-public class CyclingPortal implements CyclingPortalInterface {
+public class CyclingPortal implements CyclingPortalInterface{
 	private ArrayList<Rider> ridersInternal = new ArrayList<Rider>();
 	private ArrayList<Team> teamsInternal = new ArrayList<Team>();
 	private ArrayList<Race> racesInternal = new ArrayList<Race>();
+	private ArrayList<Result> resultsInternal = new ArrayList<Result>();
 	private int currentStageID = 0;
 	private int currentSegmentID = 0;
-	
+	private int currentRaceID = 0;
+	private int currentTeamID = 0;
+	private int currentRiderID = 0;
+
 	/**
 	* This method gets the races that are currently in the system
 	* 
@@ -50,7 +54,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		return false;
 	}
-	
+
 	/**
 	* This method checks to see if the name of the race exists
 	*
@@ -66,9 +70,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 		return false;
 	}
-	
+
 	/**
-	* Checks to see if the name given for a race is invalid, not longer then 30 characters and is not blank
+	* Checks to see if the name given for a race is valid, not longer then 30 characters and is not blank
 	*
 	* @param name : Race's name
 	* @return boolean value depending on if the name is invalid, true if invalid and false if valid
@@ -101,7 +105,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		racesInternal.add(newRace);
 		return racesInternal.get(racesInternal.size()-1).getRaceID();
 	}
-	
+
 	/**
 	* Getting the details about a race from its ID
 	*
@@ -310,7 +314,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 		throw new IDNotRecognisedException();
 	}
 
-
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -397,72 +400,321 @@ public class CyclingPortal implements CyclingPortalInterface {
 				}
 
 				//remove results
-				
+				for (int c = 0; c < resultsInternal.size(); c++){
+					Result currentResult = resultsInternal.get(c);
+					if (currentResult.getRiderID() == riderToRemove.getRiderID()){
+						resultsInternal.remove(c);
+					}
+				}
 			}
         }
 		throw new IDNotRecognisedException();
 
 	}
 
+	public boolean riderIDInvalid(int riderID){
+		for (Rider a : ridersInternal){
+			if(a.getRiderID() == riderID){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean stageIDInvalid(int stageID){
+		for (Race a : racesInternal){
+			for(int b : a.getStageIDs()){
+				if (b == stageID){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	@Override
 	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
 			throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
 			InvalidStageStateException {
-		// TODO Auto-generated method stub
-
+		if (riderIDInvalid(riderId) || stageIDInvalid(stageId)){
+			throw new IDNotRecognisedException();
+		}
+		LocalTime temp = checkpoints[0]; 
+		for(LocalTime a : checkpoints){
+			if (a.isBefore(temp)){
+				throw new InvalidCheckpointsException();
+			}
+			temp = a;
+		}
+		Result newResult = new Result(stageId, riderId, checkpoints);
+		resultsInternal.add(newResult);
 	}
 
 	@Override
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		for (Result a : resultsInternal){
+			if (a.getRiderID() == riderId && a.getStageID() == stageId){
+				return a.getTimes();
+			}
+		}
+		throw new IDNotRecognisedException();
+	}
+
+	public void sortResultsByTime(){
+		int n = resultsInternal.size();  
+        for (int j = 1; j < n; j++) {  
+            Result key = resultsInternal.get(j);
+            int i = j-1;
+            while ( (i > -1) && ( resultsInternal.get(i).getTimeTotal() > key.getTimeTotal() ) ) {
+                resultsInternal.set(i+1,resultsInternal.get(i));
+                i--;
+            }
+            resultsInternal.set(i+1, key);
+        }
 	}
 
 	@Override
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		int desiredRiderIndex = -1;
+		ArrayList<Integer> riderTimes = new ArrayList<Integer>();
+		int index = 0;
+		sortResultsByTime();
 
+		//step through to find the result needed
+		for (Result a : resultsInternal){
+			if(a.getStageID() == stageId){
+				if(a.getRiderID() == riderId){
+					desiredRiderIndex = index;
+				}
+				
+				int currentRiderTime = a.getTimeTotal();
+				riderTimes.add(currentRiderTime);
+			}
+		}
+
+		if (desiredRiderIndex < 0){
+			throw new IDNotRecognisedException();		
+		}
+
+		//step backwards through the results to adjust the times
+
+		Integer prevCheckedTime = riderTimes.get(riderTimes.size()-1);
+		Integer smallestInSectionIndex = riderTimes.size() - 1;
+
+		for (int i = riderTimes.size()-1; i >= 0; i--){
+			int currentTime = riderTimes.get(i);
+			int difference = currentTime - prevCheckedTime;
+
+			if (difference > 1 || (difference <= 1 && i == 0)){
+				for(int a = i+1; a <= smallestInSectionIndex; a++){
+					riderTimes.set(a,prevCheckedTime);
+				}
+				smallestInSectionIndex = i;
+			}
+		}
+
+		int desiredRiderTime = riderTimes.get(desiredRiderIndex);
+		int hours = desiredRiderTime / 3600;
+		int minutes = (desiredRiderTime % 3600) / 60;
+		int seconds = desiredRiderTime % 60;
+		LocalTime desiredRiderAdjustedTime = LocalTime.of(hours, minutes, seconds);
+		return desiredRiderAdjustedTime;
+	}
+	
 	@Override
 	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-
+		for (int a = 0; a < resultsInternal.size(); a ++){
+			if (resultsInternal.get(a).getRiderID() == riderId && resultsInternal.get(a).getStageID() == stageId){
+				resultsInternal.remove(a);
+			}
+		}
+		throw new IDNotRecognisedException();
 	}
 
 	@Override
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Integer> riderIDsInOrder = new ArrayList<Integer>();
+		sortResultsByTime();
+		for(Result res : resultsInternal){
+			if (res.getStageID() == stageId){
+				riderIDsInOrder.add(res.getRiderID());
+			}
+		}
+		if (riderIDsInOrder.size() == 0){
+			throw new IDNotRecognisedException();
+		}
+		int[] ridersIntArray = new int[riderIDsInOrder.size()];
+		for (int i = 0; i < ridersIntArray.length; i++){
+			ridersIntArray[i] = riderIDsInOrder.get(i);
+		}
+		return ridersIntArray;
 	}
 
 	@Override
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		int desiredRiderIndex = -1;
+		ArrayList<Integer> riderTimes = new ArrayList<Integer>();
+		sortResultsByTime();
+
+		//step through to find the result needed
+		for (Result a : resultsInternal){
+			if(a.getStageID() == stageId){
+				int currentRiderTime = a.getTimeTotal();
+				riderTimes.add(currentRiderTime);
+			}
+		}
+
+		if (desiredRiderIndex < 0){
+			throw new IDNotRecognisedException();		
+		}
+
+		//step backwards through the results to adjust the times
+
+		Integer prevCheckedTime = riderTimes.get(riderTimes.size()-1);
+		Integer smallestInSectionIndex = riderTimes.size() - 1;
+		LocalTime[] riderAdjustedTimesArray = new LocalTime[riderTimes.size()];
+
+		for (int i = riderTimes.size()-1; i >= 0; i--){
+			int currentTime = riderTimes.get(i);
+			int difference = currentTime - prevCheckedTime;
+
+			if (difference > 1 || (difference <= 1 && i == 0)){
+				for(int a = i+1; a <= smallestInSectionIndex; a++){
+					riderTimes.set(a,prevCheckedTime);
+				}
+				smallestInSectionIndex = i;
+			}
+
+		}
+		for (int i = 0; i < riderTimes.size()-1; i++){
+			int timeSeconds = riderTimes.get(i);
+			int hours = timeSeconds / 3600;
+			int minutes = (timeSeconds % 3600) / 60;
+			int seconds = timeSeconds % 60;
+			riderAdjustedTimesArray[i] = LocalTime.of(hours, minutes, seconds);
+		}
+		return riderAdjustedTimesArray;
 	}
 
 	@Override
 	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		final int[] POINTS_FLAT_STAGE = {50,30,20,18,16,14,12,10,8,7,6,5,4,3,2};
+		final int QUALIFYING = 15;
+		//get rider IDs in order
+		ArrayList<Integer> riderIDsInOrder = new ArrayList<Integer>();
+		sortResultsByTime();
+		for(Result res : resultsInternal){
+			if (res.getStageID() == stageId){
+				riderIDsInOrder.add(res.getRiderID());
+			}
+		}
+		if (riderIDsInOrder.size() == 0){
+			throw new IDNotRecognisedException();
+		}
+
+		//find stage type - points are allocated differently
+		StageType desiredStageType = null;
+		for (Race race : racesInternal){
+			for (Stage stage : race.getStages()){
+				if (stage.getStageId() == stageId){
+					desiredStageType = stage.getStageType();
+				}
+			}
+		}
+		//Assume that the desired stage is already a flat stage
+		
+		//replace IDs with points for each entry
+		for (int i = 0; i < riderIDsInOrder.size(); i++){
+			if (i <= QUALIFYING){
+				riderIDsInOrder.set(i,0);
+			}
+			switch (desiredStageType){
+				case HIGH_MOUNTAIN:
+					riderIDsInOrder.set(i,POINTS_FLAT_STAGE [i]);
+					break;
+				default:
+					break;
+
+			}
+		}
+		
+		//swap from arraylist to int[]
+		int[] ridersIntArray = new int[riderIDsInOrder.size()];
+		for (int i = 0; i < ridersIntArray.length; i++){
+			ridersIntArray[i] = riderIDsInOrder.get(i);
+		}
+		return ridersIntArray;
 	}
 
 	@Override
 	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		final int[] POINTS_MID_MNTN_STAGE = {30,25,22,19,17,15,13,11,9,7,6,5,4,3,2};
+		final int[] POINTS_HIGH_MNTN_STAGE = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
+		final int QUALIFYING = 15;
+		//get rider IDs in order
+		ArrayList<Integer> riderIDsInOrder = new ArrayList<Integer>();
+		sortResultsByTime();
+		for(Result res : resultsInternal){
+			if (res.getStageID() == stageId){
+				riderIDsInOrder.add(res.getRiderID());
+			}
+		}
+		if (riderIDsInOrder.size() == 0){
+			throw new IDNotRecognisedException();
+		}
+
+		//find stage type - points are allocated differently
+		StageType desiredStageType = null;
+		for (Race race : racesInternal){
+			for (Stage stage : race.getStages()){
+				if (stage.getStageId() == stageId){
+					desiredStageType = stage.getStageType();
+				}
+			}
+		}
+		//Assume that the desired stage is already a flat stage
+		
+		//replace IDs with points for each entry
+		for (int i = 0; i < riderIDsInOrder.size(); i++){
+			if (i <= QUALIFYING){
+				riderIDsInOrder.set(i,0);
+			}
+			switch (desiredStageType){
+				case HIGH_MOUNTAIN:
+					riderIDsInOrder.set(i,POINTS_HIGH_MNTN_STAGE[i]);
+					break;
+				case MEDIUM_MOUNTAIN:
+					riderIDsInOrder.set(i,POINTS_MID_MNTN_STAGE[i]);
+					break;
+				default:
+					break;
+			}
+		}
+		
+		//swap from arraylist to int[]
+		int[] ridersIntArray = new int[riderIDsInOrder.size()];
+		for (int i = 0; i < ridersIntArray.length; i++){
+			ridersIntArray[i] = riderIDsInOrder.get(i);
+		}
+		return ridersIntArray;
 	}
 
 	@Override
 	public void eraseCyclingPortal() {
-		// TODO Auto-generated method stub
-
+		ridersInternal = new ArrayList<Rider>();
+		teamsInternal = new ArrayList<Team>();
+		racesInternal = new ArrayList<Race>();
+		resultsInternal = new ArrayList<Result>();
+		currentStageID = 0;
+		currentSegmentID = 0;
+		currentRaceID = 0;
+		currentTeamID = 0;
+		currentRiderID = 0;
 	}
 
 	@Override
 	public void saveCyclingPortal(String filename) throws IOException {
-		// TODO Auto-generated method stub
+			
 
 	}
 
@@ -472,9 +724,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	}
 
+//The end of MiniCyclingPortalInterface
+//The beginning of CyclingPortalInterface
 	@Override
 	public void removeRaceByName(String name) throws NameNotRecognisedException {
-		// TODO Auto-generated method stub
+		for (int a = 0; a < racesInternal.size(); a++){
+			if (racesInternal.get(a).getName().equals(name)){
+				racesInternal.remove(a);
+			}
+		}
+		throw new NameNotRecognisedException();
 
 	}
 
@@ -486,7 +745,39 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
+		
+		////-----rethink after getRidersGeneralClassificationRank-----////
+		/*
+
+		int[] requiredStagesFromRace = {};
+		Integer amountOfStages = null;
+		for (Race a : racesInternal){
+			if(a.getRaceID() == raceId){
+				requiredStagesFromRace = a.getStageIDs();
+				amountOfStages = requiredStagesFromRace.length;
+			}
+		}
+		sortResultsByTime();
+		//get race results per stage
+		for (Result a : resultsInternal){
+			//search through results
+			//find results in order
+			//find riderIDs in order of times
+			//find times in order
+
+		}
+		//sum times
+		//sum points
+		//sort both in parallel
+		//
+
+
+		//get rider order per stage
+		//find total eadjusted time for each stage
+		//total points
+		//sort both lists so that points are in order of time
+		
+		*/
 		return null;
 	}
 
@@ -513,5 +804,4 @@ public class CyclingPortal implements CyclingPortalInterface {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
