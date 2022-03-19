@@ -1,13 +1,15 @@
 package cycling;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.io.Serializable;
+import java.time.temporal.ChronoUnit;
 
-public class Result {
+public class Result implements Serializable{
     private int stageID;
     private int riderID;
-    private LocalDateTime[] checkpointTimes;
+    private LocalTime[] checkpointTimes;
 
-    public Result(int sID, int rID, LocalDateTime... cpTimes){
+    public Result(int sID, int rID, LocalTime[] cpTimes){
         stageID = sID;
         riderID = rID;
         checkpointTimes = cpTimes;
@@ -21,7 +23,15 @@ public class Result {
         return stageID;
     }
 
-    public LocalDateTime[] getTimes(){
+    public LocalTime[] getTimes(){
         return checkpointTimes;
+    }
+    
+    public int getTimeTotal(){
+        LocalTime start = checkpointTimes[0];
+        LocalTime finish = checkpointTimes[checkpointTimes.length-1];
+        long difference = start.until(finish, ChronoUnit.SECONDS);
+        Integer defInt = Math.toIntExact(difference);
+        return defInt;
     }
 }

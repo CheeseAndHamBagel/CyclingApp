@@ -1,4 +1,5 @@
 package cycling;
+import cycling.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -25,6 +26,17 @@ public class CyclingPortal implements CyclingPortalInterface{
 	private int currentTeamID = 0;
 	private int currentRiderID = 0;
 
+	public CyclingPortal(){
+		ridersInternal = new ArrayList<Rider>();
+		teamsInternal = new ArrayList<Team>();
+		racesInternal = new ArrayList<Race>();
+		resultsInternal = new ArrayList<Result>();
+		currentStageID = 0;
+		currentSegmentID = 0;
+		currentRaceID = 0;
+		currentTeamID = 0;
+		currentRiderID = 0;
+	}
 	/**
 	* This method gets the races that are currently in the system
 	* 
@@ -412,6 +424,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	}
 
+
 	public boolean riderIDInvalid(int riderID){
 		for (Rider a : ridersInternal){
 			if(a.getRiderID() == riderID){
@@ -420,6 +433,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 		}
 		return true;
 	}
+
 
 	public boolean stageIDInvalid(int stageID){
 		for (Race a : racesInternal){
@@ -459,6 +473,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 		}
 		throw new IDNotRecognisedException();
 	}
+
 
 	public void sortResultsByTime(){
 		int n = resultsInternal.size();  
@@ -787,9 +802,42 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return null;
 	}
 
+
+	private ArrayList<Result> getResultListInStage(int stageID){
+		ArrayList<Result> resultsNeeded = new ArrayList<Result>();
+		for (Result res : resultsInternal){
+			if (res.getStageID() == stageID){
+				resultsNeeded.add(res);
+			}
+		}
+		return resultsNeeded;
+	}
+
 	@Override
 	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
+		//find the race in racesInternal
+		Race raceInQuestion = null;
+		for (Race race : racesInternal){
+			if (race.getRaceID() == raceId){
+					raceInQuestion = race;
+			}
+		}
+
+		if (raceInQuestion == null){
+			throw new IDNotRecognisedException();
+		}
+
+		//iterate through stages in the race
+		sortResultsByTime();
+		ArrayList<Result> resultsInStage = new ArrayList<Result>();
+		for (Stage stage : raceInQuestion.getStages()){
+			//find a list of results for that stage
+			resultsInStage = getResultListInStage(stage.getStageId());
+
+
+
+
+		}
 		return null;
 	}
 

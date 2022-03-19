@@ -14,7 +14,7 @@ import java.time.LocalTime;
  * @version 1.1
  *
  */
-public interface MiniCyclingPortalInterface extends Serializable {
+public interface MiniCyclingPortalInterface extends Serializable{
 
 	/**
 	 * Get the races currently created in the platform.

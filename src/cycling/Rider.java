@@ -1,5 +1,8 @@
 package cycling;
-public class Rider {
+
+import java.io.Serializable;
+
+public class Rider implements Serializable{
     /**
      * The rider class
      * 
