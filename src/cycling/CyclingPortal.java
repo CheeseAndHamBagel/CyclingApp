@@ -197,7 +197,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* Gets a list of the id of the stages that are in a race
 	*
 	* @param raceId : The Id of the race that is wanted
-	* @throws IdNotRecognisedException : If the Id is not within the system
+	* @throws IDNotRecognisedException : If the Id is not within the system
 	* @return The list of stage IDs within the wanted race, ordered from first to last.
 	*/
 	@Override
@@ -214,7 +214,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* This method gets the length of a stage in km
 	*
 	* @param stageId : The ID of the stage needed
-	* @throws IdNotRecognisedException : If the Id is not within the system
+	* @throws IDNotRecognisedException : If the Id is not within the system
 	* @return The length of the stage
 	*/
 	@Override
@@ -233,7 +233,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* The method removes a stage and all the details relating to it 
 	*
 	* @param stageId : The ID of the stage wanted
-	* @throws IdNotRecognisedException : If the Id is not within the system
+	* @throws IDNotRecognisedException : If the Id is not within the system
 	*/
 	@Override
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
@@ -248,6 +248,20 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	}
 
+	/**
+	* Adds a climb segment to a stage
+	*
+	* @param stageId : The ID of the stage that you want to add a climb to 
+	* @param location : The location in km where the climb finishes within the stage
+	* @param type :  The type of the climb - {@link SegmentType#C4}, {@link SegmentType#C3}, {@link SegmentType#C2}, {@link SegmentType#C1}, or {@link SegmentType#HC}.
+	* @param averagerGradient : The average gradient of the climb
+	* @param length : The length of the climb in km
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws InvalidLocationException : If the location is not within the length of the stage
+	* @throws InvalidStageStateException : The stage is waiting for results
+	* @throws InvalidStageTypeException : Time-trial stages cannot contain any segments 
+	* @return The ID of the segment created
+	*/
 	@Override
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
@@ -272,6 +286,17 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* Adds a sprint segment to a stage
+	*
+	* @param stageId : The Id of the stage you wish to put the sprint into
+	* @param location : The location in km where the sprint finshed within the stage
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws InvalidLocationException : If the location is not within the length of the stage
+	* @throws InvalidStageStateException : The stage is waiting for results
+	* @throws InvalidStageTypeException : Time-trial stages cannot contain any segments 
+	* @return The ID of the segment created
+	*/
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
@@ -294,6 +319,13 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* Removes a segment from a stage
+	*
+	* @param segmentId : The ID of the segment wishing to be you removed
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws InvalidStageStateException : The stage is waiting for results
+	*/
 	@Override
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
 		for (Race a : racesInternal){
@@ -311,6 +343,13 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* This concludes the preparation of a stage and will make the state of the stage "waiting for results"
+	*
+	* @param stageId : The ID of the stage to be concluded 
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws InvalidStageStateException : The stage is waiting for results
+	*/
 	@Override
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
 		for (Race a : racesInternal){
@@ -326,6 +365,13 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
+	/** 
+	* Gets all the segments within a stage
+	*
+	* @param stageId : The ID of the stage wanted
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @return A list of segment IDs ordered by there location within the stage
+	*/
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -336,6 +382,15 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
+	/**
+	* Creates a team using a name and desciption
+	* 
+	* @param name : The name of the team 
+	* @param description : The desciption of the team 
+	* @throws IllegalNameException : If the name given is already within the system
+	* @throws InvalidNameException : If the name given is blank or is more then 30 characters long
+	* @return A ID for the team
+	*/
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
 		if (nameTeamExists(name, teamsInternal)){
@@ -349,6 +404,12 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return teamsInternal.get(teamsInternal.size()-1).getTeamID();
 	}
 
+	/**
+	* Removes a team
+	*
+	* @param teamId : The ID of the team to be removed
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	*/
 	@Override
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
 		for(int a = 0; a < teamsInternal.size(); a++){
@@ -358,6 +419,11 @@ public class CyclingPortal implements CyclingPortalInterface{
 		}
 	}
 
+	/**
+	* Gets all the team IDs in the system 
+	*
+	* @return The list of IDs of teams
+	*/
 	@Override
 	public int[] getTeams() {
 		int teamsSize = teamsInternal.size();
@@ -368,6 +434,13 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return teamIDs;
 	}
 
+	/**
+	* Get the riders within a team 
+	*
+	* @param teamId : The Id of the team wanted
+	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @return A list of hte riders' ID
+	*/
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
 		for(Team a : teamsInternal){
