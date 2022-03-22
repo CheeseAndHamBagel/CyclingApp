@@ -1,5 +1,4 @@
 package cycling;
-import cycling.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -90,7 +89,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* @return boolean value depending on if the name is invalid, true if invalid and false if valid
 	*/
 	public boolean nameInValid(String name){
-		if (name.length() > 30 || name.contains(" ") || name.equals(null) || name.equals("")){
+		if (name.length() > 30 || name.contains("\s") || name.contains(" ") || name.equals(null) || name.equals("")){
 			return true;
 		}
 		return false;
@@ -108,10 +107,10 @@ public class CyclingPortal implements CyclingPortalInterface{
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
 		if (nameRaceExists(name, racesInternal)){
-			throw new IllegalNameException();
+			throw new IllegalNameException("That name is already taken");
 		}
 		if (nameInValid(name)){
-			throw new InvalidNameException();
+			throw new InvalidNameException("That name is invalid");
 		}
 		Race newRace = new Race(currentRaceID++, name, description);
 		racesInternal.add(newRace);
@@ -185,9 +184,22 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
+		if (nameInValid(stageName)){
+			throw new InvalidNameException("Invalid name");
+		}
+		if (length < 5.0){
+			throw new InvalidLengthException();
+		}
 		for (Race a : racesInternal){
 			if (a.getRaceID() == raceId){
-					return a.addStage(currentStageID++, stageName, description, length, startTime, type);
+				if ( a.getStages() != null){
+					for (Stage b : a.getStages()){
+						if (b.getName() == stageName){
+							throw new IllegalNameException();
+							}
+						}
+					}
+				return a.addStage(currentStageID++, stageName, description, length, startTime, type);
 				}
 			}
 		throw new IDNotRecognisedException();
@@ -197,7 +209,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* Gets a list of the id of the stages that are in a race
 	*
 	* @param raceId : The Id of the race that is wanted
-	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws IdNotRecognisedException : If the Id is not within the system
 	* @return The list of stage IDs within the wanted race, ordered from first to last.
 	*/
 	@Override
@@ -214,7 +226,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* This method gets the length of a stage in km
 	*
 	* @param stageId : The ID of the stage needed
-	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws IdNotRecognisedException : If the Id is not within the system
 	* @return The length of the stage
 	*/
 	@Override
@@ -233,7 +245,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	* The method removes a stage and all the details relating to it 
 	*
 	* @param stageId : The ID of the stage wanted
-	* @throws IDNotRecognisedException : If the Id is not within the system
+	* @throws IdNotRecognisedException : If the Id is not within the system
 	*/
 	@Override
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
@@ -248,20 +260,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	}
 
-	/**
-	* Adds a climb segment to a stage
-	*
-	* @param stageId : The ID of the stage that you want to add a climb to 
-	* @param location : The location in km where the climb finishes within the stage
-	* @param type :  The type of the climb - {@link SegmentType#C4}, {@link SegmentType#C3}, {@link SegmentType#C2}, {@link SegmentType#C1}, or {@link SegmentType#HC}.
-	* @param averagerGradient : The average gradient of the climb
-	* @param length : The length of the climb in km
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @throws InvalidLocationException : If the location is not within the length of the stage
-	* @throws InvalidStageStateException : The stage is waiting for results
-	* @throws InvalidStageTypeException : Time-trial stages cannot contain any segments 
-	* @return The ID of the segment created
-	*/
 	@Override
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
@@ -286,17 +284,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
-	/**
-	* Adds a sprint segment to a stage
-	*
-	* @param stageId : The Id of the stage you wish to put the sprint into
-	* @param location : The location in km where the sprint finshed within the stage
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @throws InvalidLocationException : If the location is not within the length of the stage
-	* @throws InvalidStageStateException : The stage is waiting for results
-	* @throws InvalidStageTypeException : Time-trial stages cannot contain any segments 
-	* @return The ID of the segment created
-	*/
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
@@ -319,13 +306,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
-	/**
-	* Removes a segment from a stage
-	*
-	* @param segmentId : The ID of the segment wishing to be you removed
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @throws InvalidStageStateException : The stage is waiting for results
-	*/
 	@Override
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
 		for (Race a : racesInternal){
@@ -343,13 +323,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
-	/**
-	* This concludes the preparation of a stage and will make the state of the stage "waiting for results"
-	*
-	* @param stageId : The ID of the stage to be concluded 
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @throws InvalidStageStateException : The stage is waiting for results
-	*/
 	@Override
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
 		for (Race a : racesInternal){
@@ -365,13 +338,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
-	/** 
-	* Gets all the segments within a stage
-	*
-	* @param stageId : The ID of the stage wanted
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @return A list of segment IDs ordered by there location within the stage
-	*/
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
 		for (Race a : racesInternal){
@@ -382,15 +348,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		throw new IDNotRecognisedException();
 	}
 
-	/**
-	* Creates a team using a name and desciption
-	* 
-	* @param name : The name of the team 
-	* @param description : The desciption of the team 
-	* @throws IllegalNameException : If the name given is already within the system
-	* @throws InvalidNameException : If the name given is blank or is more then 30 characters long
-	* @return A ID for the team
-	*/
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
 		if (nameTeamExists(name, teamsInternal)){
@@ -404,12 +361,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return teamsInternal.get(teamsInternal.size()-1).getTeamID();
 	}
 
-	/**
-	* Removes a team
-	*
-	* @param teamId : The ID of the team to be removed
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	*/
 	@Override
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
 		for(int a = 0; a < teamsInternal.size(); a++){
@@ -419,11 +370,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		}
 	}
 
-	/**
-	* Gets all the team IDs in the system 
-	*
-	* @return The list of IDs of teams
-	*/
 	@Override
 	public int[] getTeams() {
 		int teamsSize = teamsInternal.size();
@@ -434,13 +380,6 @@ public class CyclingPortal implements CyclingPortalInterface{
 		return teamIDs;
 	}
 
-	/**
-	* Get the riders within a team 
-	*
-	* @param teamId : The Id of the team wanted
-	* @throws IDNotRecognisedException : If the Id is not within the system
-	* @return A list of hte riders' ID
-	*/
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
 		for(Team a : teamsInternal){
@@ -459,6 +398,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 				if (name == null || yearOfBirth <= 1900){
 					throw new IllegalArgumentException();
 				}
+				
 				Rider temp = new Rider(currentRiderID++, name, yearOfBirth, teamID);
 				ridersInternal.add(temp);
 				return a.addRider(temp.getRiderID());
@@ -906,7 +846,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 		for (Stage stage : raceInQuestion.getStages()){
 			//find a list of results for that stage
 			resultsInStage = getResultListInStage(stage.getStageId());
-
+			
 
 
 
@@ -924,5 +864,50 @@ public class CyclingPortal implements CyclingPortalInterface{
 	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public String[] debugTeamsToString(){
+		int size = teamsInternal.size();
+		String[] teamsAsStrings = new String[size];
+		for (int i = 0; i < size; i++){
+			teamsAsStrings[i] = teamsInternal.get(i).toString();
+		}
+		return teamsAsStrings;
+	}
+
+	public String[] debugRidersToString(){
+		int size = ridersInternal.size();
+		String[] ridersAsStrings = new String[size];
+		for (int i = 0; i < size; i++){
+			ridersAsStrings[i] = ridersInternal.get(i).toString();
+		}
+		return ridersAsStrings;
+	}
+
+	public String[] debugRacesToStringLen(){
+		int size = racesInternal.size();
+		String[] racesAsStrings = new String[size];
+		for (int i = 0; i < size; i++){
+			racesAsStrings[i] = racesInternal.get(i).toString();
+		}
+		return racesAsStrings;
+	}
+
+	public String[] debugRacesToStringStage(){
+		int size = racesInternal.size();
+		String[] racesAsStrings = new String[size];
+		for (int i = 0; i < size; i++){
+			racesAsStrings[i] = racesInternal.get(i).toStringStage();
+		}
+		return racesAsStrings;
+	}
+
+	public String[] debugResultsToString(){
+		int size = resultsInternal.size();
+		String[] resultsAsStrings = new String[size];
+		for (int i = 0; i < size; i++){
+			resultsAsStrings[i] = resultsInternal.get(i).toString();
+		}
+		return resultsAsStrings;
 	}
 }

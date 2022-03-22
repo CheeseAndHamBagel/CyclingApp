@@ -34,4 +34,8 @@ public class Result implements Serializable{
         Integer defInt = Math.toIntExact(difference);
         return defInt;
     }
+
+    public String toString(){
+        return String.format("rider=%d,stage=%d,time=%dseconds",riderID,stageID,this.getTimeTotal());
+    }
 }

@@ -64,4 +64,8 @@ public class Rider implements Serializable{
     public void changeTeam(int newTeamID){
         teamID = newTeamID;
     }
+
+    public String toString(){
+        return String.format("id=%d,name=%s,yob=%d,team=%d",riderID,name,yearOfBirth,teamID);
+    }
 }

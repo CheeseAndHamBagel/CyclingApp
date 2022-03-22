@@ -13,6 +13,7 @@ public class Team implements Serializable{
         name = n;
         description = desc;
         teamID = tID;
+        riders = new ArrayList<Integer>();
     }
 
     public String getName(){
@@ -46,5 +47,12 @@ public class Team implements Serializable{
                 riders.remove(a);
             }
         }
+    }
+    public String toString(){
+        String ridersStr = "";
+        for (Integer a : riders){
+            ridersStr += Integer.toString(a) + ",";
+        }
+        return String.format("id=%d,name=%s,description=%s,riders=[%s]",teamID,name,description,ridersStr);
     }
 }

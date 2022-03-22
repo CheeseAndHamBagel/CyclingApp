@@ -15,6 +15,7 @@ public class Race implements Serializable{
         name = n;
         description = d;
         raceID = index;
+        stages = new ArrayList<Stage>();
     }
 
     public int getRaceID(){
@@ -47,7 +48,7 @@ public class Race implements Serializable{
     public String toString(){
         double stageLength = 0.0;
         for (Stage a : stages){
-            stageLength += a.getStageId();
+            stageLength += a.getStageLength();
         }
         return String.format("id=%d,name=%s,description=%s,total length=%d km",raceID,name,description,stageLength);
     }

@@ -23,6 +23,7 @@ public class Stage implements Serializable{
         description = stageDescription;
         length = stageLength;
         startTime = stageStartTime;
+        segments = new ArrayList<Segment>();
     }
 
     public String toString(){
@@ -37,6 +38,14 @@ public class Stage implements Serializable{
         return stageID;
     }
 
+    public String getName(){
+        return name;
+    }
+
+    public String getDescription(){
+        return description;
+    }
+    
     public double getStageLength(){
         return length;
     }
