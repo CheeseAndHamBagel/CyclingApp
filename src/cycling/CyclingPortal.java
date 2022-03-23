@@ -43,8 +43,8 @@ public class CyclingPortal implements CyclingPortalInterface{
 	*/
 	@Override
 	public int[] getRaceIds() {
-		int[] races = {};
-		for(int i = 0; i < racesInternal.size(); ){
+		int[] races = new {racesInternal.size()};
+		for(int i = 0; i < racesInternal.size(); i++ ){
 			races[i] = racesInternal.get(i).getRaceID();
 		}
 		return races;
@@ -813,16 +813,35 @@ public class CyclingPortal implements CyclingPortalInterface{
 		currentRiderID = 0;
 	}
 
-	@Override
+	@Override 
 	public void saveCyclingPortal(String filename) throws IOException {
-			
-
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename+".ser"))) {
+			out.writeObject(ridersInternal);
+			out.writeObject(teamsInternal);
+			out.writeObject(racesInternal);
+			out.writeObject(resultsInternal);
+			out.writeObject(currentStageID);
+			out.writeObject(currentSegmentID);
+			out.writeObject(currentRaceID);
+			out.writeObject(currentTeamID);
+			out.writeObject(currentRiderID);
+		}		
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
-		// TODO Auto-generated method stub
-
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename+".ser"))) {
+			ridersInternal = (ArrayList<Rider>) in.readObject();
+			teamsInternal =  (ArrayList<Team>) in.readObject();
+			racesInternal =  (ArrayList<Race>) in.readObject();
+			resultsInternal = (ArrayList<Result>)  in.readObject();
+			currentStageID =  (Integer) in.readObject();
+			currentSegmentID = (Integer)  in.readObject();
+			currentRaceID =  (Integer) in.readObject();
+			currentTeamID = (Integer) in.readObject();
+			currentRiderID= (Integer) in.readObject();
+		} 
 	}
 
 //The end of MiniCyclingPortalInterface
