@@ -44,7 +44,7 @@ public class CyclingPortal implements CyclingPortalInterface{
 	*/
 	@Override
 	public int[] getRaceIds() {
-		int[] races = new {racesInternal.size()};
+		int[] races = new int[{racesInternal.size()];
 		for(int i = 0; i < racesInternal.size(); i++ ){
 			races[i] = racesInternal.get(i).getRaceID();
 		}
