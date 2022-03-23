@@ -50,7 +50,7 @@ public class Race implements Serializable{
         for (Stage a : stages){
             stageLength += a.getStageLength();
         }
-        return String.format("id=%d,name=%s,description=%s,total length=%d km",raceID,name,description,stageLength);
+        return String.format("id=%d,name=%s,description=%s,total length=%f km",raceID,name,description,stageLength);
     }
 
     public String toStringStage(){
