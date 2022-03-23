@@ -553,14 +553,32 @@ public class CyclingPortal implements CyclingPortalInterface{
 
 	@Override
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-		for (Result a : resultsInternal){
-			if (a.getRiderID() == riderId && a.getStageID() == stageId){
-				return a.getTimes();
+		boolean foundRider = false;
+		for (Rider a : ridersInternal){
+			if (a.getRiderID() == riderId){
+				foundRider = true;
 			}
 		}
-		throw new IDNotRecognisedException();
+		
+		boolean foundStage = false;
+		for (Race b : racesInternal){
+			for (int bb : b.getStageIDs()){
+				if (bb == stageId) {
+					foundStage = true;
+				}
+			}
+		}
+		
+		if (foundRider == false || foundStage == false){
+			throw new IDNotRecognisedException();
+		}
+		for (Result c : resultsInternal){
+			if (c.getRiderID() == riderId && c.getStageID() == stageId){
+				return c.getTimes();
+			}
+		}
+		return new LocalTime[0];	
 	}
-
 
 	public void sortResultsByTime(){
 		int n = resultsInternal.size();  
