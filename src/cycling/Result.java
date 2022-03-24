@@ -24,7 +24,7 @@ public class Result implements Serializable{
         riderID = rID;
         checkpointTimes = cpTimes;
     }
-    #
+    
     /**
      * returns the ID of the rider who achieved the result
      * @return riderID
