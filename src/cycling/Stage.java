@@ -23,7 +23,7 @@ public class Stage implements Serializable{
     private boolean waitingForResults = false;
 
     /**
-     * Constructs an instant of a team
+     * Constructs an instant of a stage
      * 
      * @param stageIdIn
      * @param stageName
